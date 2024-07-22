@@ -1,7 +1,11 @@
 [package]
 name = "crossterm_progress_bar"
-version = "1.0.0"
+version = "1.0.1"
 edition = "2021"
+
+[lib]
+name = "crossterm_progress_bar"
+path = "src/lib.rs"
 
 [dependencies]
 anyhow = "1.0.86"

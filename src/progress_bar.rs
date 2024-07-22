@@ -41,7 +41,7 @@ impl ProgressBar {
         }
     }
 
-    /// Sets progress towards the max_value previously provided
+    /// Sets progress towards the max_value and rerenders the bar
     pub fn set_progress(&mut self, value: usize) -> anyhow::Result<()> {
         self.value = value;
 
