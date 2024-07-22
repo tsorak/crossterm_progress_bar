@@ -32,9 +32,14 @@ impl ProgressBar {
         }
     }
 
-    pub fn new_at(value: usize, max_value: usize) -> Self {
+    /// Creates a ProgressBar with x progress achieved
+    pub fn new_at(progress: usize, max_value: usize) -> Self {
+        if progress > max_value {
+            core::panic!("progress may not be greater than max_value")
+        }
+
         Self {
-            value,
+            value: progress,
             max_value,
             width: Width::Stretch,
             show_percent: true,
@@ -43,6 +48,18 @@ impl ProgressBar {
 
     /// Sets progress towards the max_value and rerenders the bar
     pub fn set_progress(&mut self, value: usize) -> anyhow::Result<()> {
+        if value > self.max_value {
+            #[cfg(debug_assertions)]
+            eprintln!("[crossterm_progress_bar] Provided value exceeds max_value");
+
+            if self.value != self.max_value {
+                self.value = self.max_value;
+                self.render()?;
+            }
+
+            return Ok(());
+        }
+
         self.value = value;
 
         self.render()?;
