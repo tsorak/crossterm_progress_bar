@@ -1,20 +1,23 @@
 use crossterm::{
     cursor,
-    style::{self, Stylize},
+    style::{PrintStyledContent, Stylize},
     terminal, ExecutableCommand,
 };
 use std::io::{stdout, Write};
 
 mod alias;
 mod chain;
+mod style;
 
 use alias::ColumnCount;
+use style::Style;
 
 pub struct ProgressBar {
     value: usize,
     max_value: usize,
     width: Width,
     show_percent: bool,
+    pub style: Style,
 }
 
 pub enum Width {
@@ -29,6 +32,7 @@ impl ProgressBar {
             max_value,
             width: Width::Stretch,
             show_percent: true,
+            style: Style::default(),
         }
     }
 
@@ -43,6 +47,7 @@ impl ProgressBar {
             max_value,
             width: Width::Stretch,
             show_percent: true,
+            style: Style::default(),
         }
     }
 
@@ -104,16 +109,16 @@ impl ProgressBar {
         };
 
         // Create the progress bar string
-        let bar = "=".repeat(filled_width) + ">" + &" ".repeat(empty_width);
+        let bar = generate_bar_string(&self.style, filled_width, empty_width);
 
         // Print the progress bar
         stdout.execute(cursor::SavePosition)?;
         if self.show_percent {
-            stdout.execute(style::PrintStyledContent(
+            stdout.execute(PrintStyledContent(
                 format!("[{}] {:.1}%", bar, progress * 100.0).stylize(),
             ))?;
         } else {
-            stdout.execute(style::PrintStyledContent(format!("[{}]", bar).stylize()))?;
+            stdout.execute(PrintStyledContent(format!("[{}]", bar).stylize()))?;
         }
         stdout.execute(cursor::RestorePosition)?;
         stdout.flush()?;
@@ -125,6 +130,15 @@ impl ProgressBar {
         stdout().execute(terminal::Clear(terminal::ClearType::CurrentLine))?;
         Ok(())
     }
+}
+
+fn generate_bar_string(style: &Style, filled_width: usize, empty_width: usize) -> String {
+    format!(
+        "{}{}{}",
+        format!("{}", style.fill_char).repeat(filled_width),
+        style.arrow_char,
+        format!("{}", style.empty_char).repeat(empty_width),
+    )
 }
 
 impl From<usize> for Width {

@@ -1,3 +1,5 @@
+use crossterm::style::StyledContent;
+
 use super::*;
 
 impl ProgressBar {
@@ -22,6 +24,35 @@ impl ProgressBar {
 
     pub fn with_max_value(&mut self, value: usize) -> &mut Self {
         self.max_value = value;
+
+        self
+    }
+}
+
+impl Style {
+    pub fn with_fill<F>(&mut self, f: F) -> &mut Self
+    where
+        F: FnOnce(StyledContent<char>) -> StyledContent<char> + Sized,
+    {
+        self.fill_char = f(self.fill_char);
+
+        self
+    }
+
+    pub fn with_empty<F>(&mut self, f: F) -> &mut Self
+    where
+        F: FnOnce(StyledContent<char>) -> StyledContent<char> + Sized,
+    {
+        self.empty_char = f(self.empty_char);
+
+        self
+    }
+
+    pub fn with_arrow<F>(&mut self, f: F) -> &mut Self
+    where
+        F: FnOnce(StyledContent<char>) -> StyledContent<char> + Sized,
+    {
+        self.arrow_char = f(self.arrow_char);
 
         self
     }

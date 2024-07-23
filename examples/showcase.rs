@@ -1,3 +1,4 @@
+use crossterm::style::Stylize;
 use crossterm_progress_bar::ProgressBar;
 
 fn main() -> anyhow::Result<()> {
@@ -9,6 +10,11 @@ fn main() -> anyhow::Result<()> {
 
     bar.set_progress(0)?;
     print_under("Absolute width progress bar")?;
+
+    bar.style
+        .with_fill(|ch| ch.green())
+        .with_arrow(|ch| ch.green())
+        .with_empty(|_| '-'.dim());
 
     let mut i = 0;
     loop {
