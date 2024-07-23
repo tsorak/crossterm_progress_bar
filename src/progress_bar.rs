@@ -3,7 +3,7 @@ use crossterm::{
     style::{PrintStyledContent, Stylize},
     terminal, ExecutableCommand,
 };
-use std::io::{stdout, Stdout, Write};
+use std::io::{stdout, Write};
 
 mod alias;
 mod chain;
@@ -51,25 +51,21 @@ impl ProgressBar {
         }
     }
 
-    /// Sets progress towards the max_value and rerenders the bar
-    pub fn set_progress(&mut self, value: usize) -> anyhow::Result<()> {
+    /// Sets progress towards the max_value
+    pub fn set_progress(&mut self, value: usize) -> &mut Self {
         if value > self.max_value {
             #[cfg(debug_assertions)]
             eprintln!("[crossterm_progress_bar] Provided value exceeds max_value");
 
             if self.value != self.max_value {
                 self.value = self.max_value;
-                self.render()?;
             }
 
-            return Ok(());
+            return self;
         }
 
         self.value = value;
-
-        self.render()?;
-
-        Ok(())
+        self
     }
 
     /// Total width the progressbar stretches over (terminal columns)
@@ -83,10 +79,13 @@ impl ProgressBar {
         self
     }
 
-    fn render(&self) -> anyhow::Result<()> {
-        let max_value = self.max_value;
-
-        let progress = self.value as f32 / max_value as f32;
+    /// Returns the bar in barebones form. As a String.
+    ///
+    /// No borders or percentage included.
+    ///
+    /// May error if terminal size can't be determined (Only if the Width::Stretch option is used).
+    pub fn render_barebones_to_string(&self) -> anyhow::Result<String> {
+        let progress = self.value as f32 / self.max_value as f32;
 
         let width = {
             match self.width {
@@ -95,16 +94,43 @@ impl ProgressBar {
             }
         };
 
-        // Calculate the filled width
         let (filled_width, empty_width) = calculate_bar_sizing(self.show_percent, progress, width);
 
-        // Create the progress bar string
-        let bar = generate_bar_string(&self.style, filled_width, empty_width);
+        Ok(generate_bar_string(&self.style, filled_width, empty_width))
+    }
+
+    /// Returns the bar in its final form. As a String.
+    ///
+    /// May error if terminal size can't be determined (Only if the Width::Stretch option is used).
+    pub fn render_to_string(&self) -> anyhow::Result<String> {
+        let progress = self.value as f32 / self.max_value as f32;
+
+        let width = {
+            match self.width {
+                Width::Stretch => terminal::size()?.0 as usize,
+                Width::Absolute(n) => n,
+            }
+        };
+
+        let (filled_width, empty_width) = calculate_bar_sizing(self.show_percent, progress, width);
+
+        let bar_barebones = generate_bar_string(&self.style, filled_width, empty_width);
+
+        Ok(add_borders_and_percentage(
+            self.show_percent,
+            bar_barebones,
+            progress,
+        ))
+    }
+
+    /// Write the bar to stdout
+    pub fn render(&self) -> anyhow::Result<()> {
+        let bar_component = self.render_to_string()?.stylize();
 
         // Print the progress bar
         let mut stdout = stdout();
         stdout.execute(cursor::SavePosition)?;
-        draw(&mut stdout, self.show_percent, bar, progress)?;
+        stdout.execute(PrintStyledContent(bar_component))?;
         stdout.execute(cursor::RestorePosition)?;
         stdout.flush()?;
 
@@ -142,19 +168,12 @@ fn generate_bar_string(style: &Style, filled_width: usize, empty_width: usize) -
     )
 }
 
-fn draw(
-    stdout: &mut Stdout,
-    show_percent: bool,
-    bar: String,
-    progress: f32,
-) -> anyhow::Result<&mut std::io::Stdout, std::io::Error> {
-    let line = if show_percent {
-        format!("[{}] {:.1}%", bar, progress * 100.0).stylize()
+fn add_borders_and_percentage(show_percent: bool, bar: String, progress: f32) -> String {
+    if show_percent {
+        format!("[{}] {:.1}%", bar, progress * 100.0)
     } else {
-        format!("[{}]", bar).stylize()
-    };
-
-    stdout.execute(PrintStyledContent(line.stylize()))
+        format!("[{}]", bar)
+    }
 }
 
 impl From<usize> for Width {

@@ -8,7 +8,7 @@ fn main() -> anyhow::Result<()> {
         .set_width(50)
         .set_show_percent(false);
 
-    bar.set_progress(0)?;
+    bar.render()?;
     print_under("Absolute width progress bar")?;
 
     bar.style
@@ -18,7 +18,7 @@ fn main() -> anyhow::Result<()> {
 
     let mut i = 0;
     loop {
-        bar.set_progress(i)?;
+        bar.set_progress(i).render()?;
 
         if i == 50 {
             print_under("Span progress bar across screen")?;
