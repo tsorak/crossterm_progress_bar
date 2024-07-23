@@ -1,5 +1,6 @@
 use crossterm::style::{StyledContent, Stylize};
 
+#[derive(Debug, Clone)]
 pub struct Style {
     pub fill_char: StyledContent<char>,
     pub empty_char: StyledContent<char>,

@@ -12,6 +12,7 @@ mod style;
 use alias::ColumnCount;
 use style::Style;
 
+#[derive(Debug, Clone)]
 pub struct ProgressBar {
     value: usize,
     max_value: usize,
@@ -20,6 +21,7 @@ pub struct ProgressBar {
     pub style: Style,
 }
 
+#[derive(Debug, Clone)]
 pub enum Width {
     Stretch,
     Absolute(ColumnCount),
