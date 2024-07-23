@@ -3,7 +3,7 @@ use crossterm::{
     style::{PrintStyledContent, Stylize},
     terminal, ExecutableCommand,
 };
-use std::io::{stdout, Write};
+use std::io::{stdout, Stdout, Write};
 
 mod alias;
 mod chain;
@@ -95,31 +95,16 @@ impl ProgressBar {
             }
         };
 
-        let mut stdout = stdout();
-
         // Calculate the filled width
-        let (filled_width, empty_width) = if self.show_percent {
-            let filled_width = (progress * (width - 10) as f32) as usize;
-            let empty_width = width - 10 - filled_width;
-            (filled_width, empty_width)
-        } else {
-            let filled_width = (progress * (width - 3) as f32) as usize;
-            let empty_width = width - 3 - filled_width;
-            (filled_width, empty_width)
-        };
+        let (filled_width, empty_width) = calculate_bar_sizing(self.show_percent, progress, width);
 
         // Create the progress bar string
         let bar = generate_bar_string(&self.style, filled_width, empty_width);
 
         // Print the progress bar
+        let mut stdout = stdout();
         stdout.execute(cursor::SavePosition)?;
-        if self.show_percent {
-            stdout.execute(PrintStyledContent(
-                format!("[{}] {:.1}%", bar, progress * 100.0).stylize(),
-            ))?;
-        } else {
-            stdout.execute(PrintStyledContent(format!("[{}]", bar).stylize()))?;
-        }
+        draw(&mut stdout, self.show_percent, bar, progress)?;
         stdout.execute(cursor::RestorePosition)?;
         stdout.flush()?;
 
@@ -132,6 +117,22 @@ impl ProgressBar {
     }
 }
 
+fn calculate_bar_sizing(
+    adjust_to_percent_section: bool,
+    progress: f32,
+    width: usize,
+) -> (usize, usize) {
+    if adjust_to_percent_section {
+        let filled_width = (progress * (width - 10) as f32) as usize;
+        let empty_width = width - 10 - filled_width;
+        (filled_width, empty_width)
+    } else {
+        let filled_width = (progress * (width - 3) as f32) as usize;
+        let empty_width = width - 3 - filled_width;
+        (filled_width, empty_width)
+    }
+}
+
 fn generate_bar_string(style: &Style, filled_width: usize, empty_width: usize) -> String {
     format!(
         "{}{}{}",
@@ -139,6 +140,21 @@ fn generate_bar_string(style: &Style, filled_width: usize, empty_width: usize) -
         style.arrow_char,
         format!("{}", style.empty_char).repeat(empty_width),
     )
+}
+
+fn draw(
+    stdout: &mut Stdout,
+    show_percent: bool,
+    bar: String,
+    progress: f32,
+) -> anyhow::Result<&mut std::io::Stdout, std::io::Error> {
+    let line = if show_percent {
+        format!("[{}] {:.1}%", bar, progress * 100.0).stylize()
+    } else {
+        format!("[{}]", bar).stylize()
+    };
+
+    stdout.execute(PrintStyledContent(line.stylize()))
 }
 
 impl From<usize> for Width {
