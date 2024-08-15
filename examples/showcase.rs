@@ -1,7 +1,7 @@
 use crossterm::style::Stylize;
-use crossterm_progress_bar::{Error, ProgressBar, Width};
+use crossterm_progress_bar::{ProgressBar, Width};
 
-fn main() -> Result<(), Error> {
+fn main() -> Result<(), std::io::Error> {
     let mut max_value = 250;
 
     let mut bar = ProgressBar::new(max_value)

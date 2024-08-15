@@ -22,3 +22,12 @@ impl From<io::Error> for Error {
         crate::Error::Io(value)
     }
 }
+
+impl From<Error> for io::Error {
+    fn from(value: Error) -> Self {
+        match value {
+            Error::Stretch(e) => e,
+            Error::Io(e) => e,
+        }
+    }
+}
