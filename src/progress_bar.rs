@@ -86,7 +86,7 @@ impl ProgressBar {
     /// No borders or percentage included.
     ///
     /// May error if terminal size can't be determined (Only if the Width::Stretch option is used).
-    pub fn render_barebones_to_string(&self) -> anyhow::Result<String> {
+    pub fn render_barebones_to_string(&self) -> Result<String, std::io::Error> {
         let progress = self.value as f32 / self.max_value as f32;
 
         let width = {
@@ -104,7 +104,7 @@ impl ProgressBar {
     /// Returns the bar in its final form. As a String.
     ///
     /// May error if terminal size can't be determined (Only if the Width::Stretch option is used).
-    pub fn render_to_string(&self) -> anyhow::Result<String> {
+    pub fn render_to_string(&self) -> Result<String, std::io::Error> {
         let progress = self.value as f32 / self.max_value as f32;
 
         let width = {
@@ -126,7 +126,7 @@ impl ProgressBar {
     }
 
     /// Write the bar to stdout
-    pub fn render(&self) -> anyhow::Result<()> {
+    pub fn render(&self) -> Result<(), std::io::Error> {
         let bar_component = self.render_to_string()?.stylize();
 
         // Print the progress bar
@@ -139,7 +139,7 @@ impl ProgressBar {
         Ok(())
     }
 
-    fn clear_line(&self) -> anyhow::Result<()> {
+    fn clear_line(&self) -> Result<(), std::io::Error> {
         stdout().execute(terminal::Clear(terminal::ClearType::CurrentLine))?;
         Ok(())
     }

@@ -12,5 +12,4 @@ name = "crossterm_progress_bar"
 path = "src/lib.rs"
 
 [dependencies]
-anyhow = "1.0.86"
 crossterm = "0.27.0"

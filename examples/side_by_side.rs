@@ -7,7 +7,7 @@ use crossterm::{
 };
 use crossterm_progress_bar::ProgressBar;
 
-fn main() -> anyhow::Result<()> {
+fn main() -> Result<(), std::io::Error> {
     let max_value = 100;
 
     let mut bar1 = ProgressBar::new(max_value)

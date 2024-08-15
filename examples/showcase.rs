@@ -1,7 +1,7 @@
 use crossterm::style::Stylize;
 use crossterm_progress_bar::ProgressBar;
 
-fn main() -> anyhow::Result<()> {
+fn main() -> Result<(), std::io::Error> {
     let mut max_value = 250;
 
     let mut bar = ProgressBar::new(max_value)
@@ -49,7 +49,7 @@ fn main() -> anyhow::Result<()> {
     Ok(())
 }
 
-fn print_under(s: &str) -> anyhow::Result<()> {
+fn print_under(s: &str) -> Result<(), std::io::Error> {
     use crossterm::{
         cursor::{MoveDown, RestorePosition, SavePosition},
         style::PrintStyledContent,
