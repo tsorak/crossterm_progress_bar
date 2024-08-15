@@ -1,11 +1,12 @@
 [package]
 name = "crossterm_progress_bar"
-version = "2.1.0"
+version = "2.1.1"
 edition = "2021"
 description = "Library for drawing progress bars"
 license = "MIT"
 repository = "https://github.com/tsorak/crossterm_progress_bar"
 keywords = ["crossterm", "progress", "bar", "cli"]
+exclude = ["assets/**"]
 
 [lib]
 name = "crossterm_progress_bar"
