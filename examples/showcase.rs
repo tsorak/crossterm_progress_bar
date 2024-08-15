@@ -1,7 +1,7 @@
 use crossterm::style::Stylize;
-use crossterm_progress_bar::ProgressBar;
+use crossterm_progress_bar::{Error, ProgressBar, Width};
 
-fn main() -> Result<(), std::io::Error> {
+fn main() -> Result<(), Error> {
     let mut max_value = 250;
 
     let mut bar = ProgressBar::new(max_value)
@@ -22,7 +22,7 @@ fn main() -> Result<(), std::io::Error> {
 
         if i == 50 {
             print_under("Span progress bar across screen")?;
-            bar.with_width("stretch");
+            bar.with_width(Width::Stretch);
         }
 
         if i == 100 {

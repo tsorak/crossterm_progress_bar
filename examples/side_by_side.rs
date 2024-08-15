@@ -5,9 +5,9 @@ use crossterm::{
     style::{PrintStyledContent, Stylize},
     ExecutableCommand,
 };
-use crossterm_progress_bar::ProgressBar;
+use crossterm_progress_bar::{Error, ProgressBar};
 
-fn main() -> Result<(), std::io::Error> {
+fn main() -> Result<(), Error> {
     let max_value = 100;
 
     let mut bar1 = ProgressBar::new(max_value)

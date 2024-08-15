@@ -86,12 +86,12 @@ impl ProgressBar {
     /// No borders or percentage included.
     ///
     /// May error if terminal size can't be determined (Only if the Width::Stretch option is used).
-    pub fn render_barebones_to_string(&self) -> Result<String, std::io::Error> {
+    pub fn render_barebones_to_string(&self) -> Result<String, crate::Error> {
         let progress = self.value as f32 / self.max_value as f32;
 
         let width = {
             match self.width {
-                Width::Stretch => terminal::size()?.0 as usize,
+                Width::Stretch => terminal::size().map_err(crate::Error::Stretch)?.0 as usize,
                 Width::Absolute(n) => n,
             }
         };
@@ -104,12 +104,12 @@ impl ProgressBar {
     /// Returns the bar in its final form. As a String.
     ///
     /// May error if terminal size can't be determined (Only if the Width::Stretch option is used).
-    pub fn render_to_string(&self) -> Result<String, std::io::Error> {
+    pub fn render_to_string(&self) -> Result<String, crate::Error> {
         let progress = self.value as f32 / self.max_value as f32;
 
         let width = {
             match self.width {
-                Width::Stretch => terminal::size()?.0 as usize,
+                Width::Stretch => terminal::size().map_err(crate::Error::Stretch)?.0 as usize,
                 Width::Absolute(n) => n,
             }
         };
@@ -126,7 +126,7 @@ impl ProgressBar {
     }
 
     /// Write the bar to stdout
-    pub fn render(&self) -> Result<(), std::io::Error> {
+    pub fn render(&self) -> Result<(), crate::Error> {
         let bar_component = self.render_to_string()?.stylize();
 
         // Print the progress bar
@@ -184,6 +184,7 @@ impl From<usize> for Width {
     }
 }
 
+/// Use this at your own risk :D (please dont)
 impl From<&str> for Width {
     fn from(value: &str) -> Self {
         match value {
